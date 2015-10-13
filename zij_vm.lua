@@ -8,8 +8,8 @@ local instructions = {
   { "J", 4 }
 }
 
-local function sim(code, start, memory)
-  local pc = start
+local function sim(code, memory, start)
+  local pc = start or 1
   local opcode = code[start]
   local len = #code
   local ic = 0
@@ -57,7 +57,7 @@ local code = {
 
 local memory = {3,4,0,0}
 
-sim(code, 1, memory)
+sim(code, memory)
 for k,v in pairs(memory) do
   print(k..":", v)
 end
