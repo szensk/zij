@@ -1,6 +1,22 @@
+ 
 local OP_Z = 1
 local OP_I = 2
 local OP_J = 3
+
+local memory = {
+  3, -- 1 operand a
+  4, -- 2 operand b
+  0, -- 3 result
+  0, -- 4 accumulator b
+  0, -- 5 constant 1
+  0  -- 6 constant 0
+}
+
+local function dump() 
+  for k,v in pairs(memory) do
+    print(k..":", v)
+  end
+end 
 
 local instructions = {
   { "Z", 2 },
@@ -8,14 +24,17 @@ local instructions = {
   { "J", 4 }
 }
 
-local function sim(code, memory, start)
-  local pc = start or 1
-  local opcode = code[start]
+local function sim(code, memory, debug)
+  local pc = 1
+  local opcode = code[pc]
   local len = #code
   local ic = 0
   print("start program [size: " .. len .. "]")
   while pc < len do
-    --print("opcode: " .. instructions[opcode][1] .. " pc: " .. pc)
+    if debug then
+      print("opcode: " .. instructions[opcode][1] .. " pc: " .. pc)
+      dump()
+    end
     ic = ic + 1
     if opcode == OP_Z then
       local mptr = code[pc+1]
@@ -33,7 +52,8 @@ local function sim(code, memory, start)
       if v1 == v2 then
         pc = pc + instructions[OP_J][2]
       else
-        --print("jump to " .. code[pc+3])
+        if debug then 
+          print("jump to " .. code[pc+3] .. " from " .. pc) end
         pc = code[pc+3]
       end
     end
@@ -45,19 +65,32 @@ end
 --test code
 
 local code = {
-  OP_Z, 3,
-  OP_Z, 4,
+  --1:  
+  OP_I, 5,
+  --3:
+  OP_J, 1, 6, 11,
+  --7:
+  OP_J, 1, 5, 17,
+  --11: X
   OP_I, 3,
-  OP_J, 3, 1, 5,
+  --13:
+  OP_J, 3, 1, 11,
+  --17: W
+  OP_J, 2, 6, 25,
+  --21:
+  OP_J, 2, 5, 33,
+  --25: Y
   OP_I, 3,
+  --27:
   OP_I, 4,
-  OP_J, 4, 2, 11,
-  OP_Z, 4
+  --29:
+  OP_J, 4, 2, 25,
+  --33: Z
+  OP_Z, 4,
+  --35
+  OP_Z, 5
 }
 
-local memory = {3,4,0,0}
-
-sim(code, memory)
-for k,v in pairs(memory) do
-  print(k..":", v)
-end
+local debug = false
+sim(code, memory, debug)
+dump()
